@@ -1,0 +1,121 @@
+{
+  "creature_type": [
+    "Aberration",
+    "Beast",
+    "Celestial",
+    "Construct",
+    "Dragon",
+    "Elemental",
+    "Fey",
+    "Fiend",
+    "Giant",
+    "Humanoid",
+    "Monstrosity",
+    "Ooze",
+    "Plant",
+    "Undead",
+    "Object"
+  ],
+
+  "humanoid_type": [
+    "Aasimar",
+    "Bugbear",
+    "Birdfolk",
+    "Catfolk",
+    "Construct",
+    "Dragonborn",
+    "Drow",
+    "Duergar",
+    "Dwarf",
+    "Elf",
+    "Firbolg",
+    "Fishfolk",
+    "Githyanki",
+    "Goblin",
+    "Goliath",
+    "Half-Elf",
+    "Halfling",
+    "Human",
+    "Kobold",
+    "Lizardfolk",
+    "Orc",
+    "Swampfolk",
+    "Taurid",
+    "Tiefling",
+    "Triton",
+    "Werefolk",
+    "Yuan-Ti"
+  ],
+
+  "colors": [
+    "Black",
+    "Blue",
+    "Brown",
+    "Gold",
+    "Green",
+    "Grey",
+    "Metal",
+    "Orange",
+    "Pink",
+    "Purple",
+    "Red",
+    "White",
+    "Yellow"
+  ],
+
+  "equipment": [
+    "Armor",
+    "Helmet",
+    "Shield",
+    "Axe",
+    "Dagger",
+    "Hammer",
+    "Mace",
+    "Spear",
+    "Staff",
+    "Sword",
+    "Whip",
+    "Unarmed",
+    "Claw",
+    "Fang",
+    "Bow",
+    "Arrow",
+    "Crossbow",
+    "Firearm",
+    "Focus",
+    "Spell",
+    "Air",
+    "Earth",
+    "Fire",
+    "Water",
+    "Ice",
+    "Lightning",
+    "Poison",
+    "Book",
+    "Backpack"
+  ],
+
+  "roles": [
+    "Melee",
+    "Ranged",
+    "Magic",
+    "Mount",
+    "Flying",
+    "Swimming",
+    "Siege"
+  ],
+
+  "body_type": [
+    "Masculine",
+    "Feminine"
+  ],
+
+  "sizes": [
+    "Tiny",
+    "Small",
+    "Medium",
+    "Large",
+    "Huge",
+    "Gargantuan"
+  ]
+}

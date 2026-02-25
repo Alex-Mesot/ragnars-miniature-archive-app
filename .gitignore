@@ -1,0 +1,47 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+00_Apps/.venv/
+
+# Build artifacts
+01_Build/build/
+01_Build/dist/
+01_Build/.pyinstaller/
+01_Build/spec/
+01_Build/.venv-build/
+01_Build/.state/
+
+# Local publish helper/state files
+manifest.new.json
+manifest.prev.json
+.archive_sync_state.json
+
+# Local app/archive runtime files
+archive_update_config.json
+archive_service_report.txt
+app_icon.iconset/
+00_Apps/app_icon_packaged.png
+
+# Optional local DB/media if you want a lightweight code-only Git repo.
+# Uncomment these if you do NOT want to version the archive content in Git.
+# miniatures.db
+# Aberration/
+# Beast/
+# Celestial/
+# Construct/
+# Dragon/
+# Elemental/
+# Fey/
+# Fiend/
+# Giant/
+# Humanoid/
+# Monstrosity/
+# Object/
+# Ooze/
+# Plant/
+# Undead/

@@ -1,0 +1,10 @@
+{
+  "manifest_url": "https://your-public-host.example.com/ragnar/manifest.json",
+  "app_release_url": "https://your-public-host.example.com/ragnar/releases",
+  "check_on_startup": true,
+  "bootstrap_full_archive": true,
+  "download_fullres_images": false,
+  "request_timeout_seconds": 6,
+  "download_timeout_seconds": 20,
+  "remove_deleted": false
+}
