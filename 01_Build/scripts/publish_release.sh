@@ -2,12 +2,13 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+BUILD_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+ROOT_DIR="$(cd "$BUILD_ROOT/.." && pwd)"
 
 usage() {
-  cat <<'EOF'
+  cat <<'USAGE'
 Usage:
-  ./01_Build/publish_release.sh [--base-url "https://host/ragnar"] [--archive-root PATH] [--manifest PATH] [--app-version X.Y.Z] [--app-url URL]
+  ./01_Build/scripts/publish_release.sh [--base-url "https://host/ragnar"] [--archive-root PATH] [--manifest PATH] [--app-version X.Y.Z] [--app-url URL]
 
 What it does:
   1) Backs up previous manifest (if present)
@@ -22,7 +23,7 @@ Options:
   --app-version   Latest app version to publish in manifest (optional)
   --app-url       App download/release URL to publish in manifest (optional)
   -h, --help      Show this help
-EOF
+USAGE
 }
 
 BASE_URL="https://pub-663041a0e08d49928417c811d6a8ab18.r2.dev"
@@ -33,35 +34,13 @@ APP_URL="https://pub-663041a0e08d49928417c811d6a8ab18.r2.dev/releases"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --base-url)
-      BASE_URL="${2:-}"
-      shift 2
-      ;;
-    --archive-root)
-      ARCHIVE_ROOT="${2:-}"
-      shift 2
-      ;;
-    --manifest)
-      MANIFEST_PATH="${2:-}"
-      shift 2
-      ;;
-    --app-version)
-      APP_VERSION="${2:-}"
-      shift 2
-      ;;
-    --app-url)
-      APP_URL="${2:-}"
-      shift 2
-      ;;
-    -h|--help)
-      usage
-      exit 0
-      ;;
-    *)
-      echo "Unknown argument: $1"
-      usage
-      exit 1
-      ;;
+    --base-url) BASE_URL="${2:-}"; shift 2 ;;
+    --archive-root) ARCHIVE_ROOT="${2:-}"; shift 2 ;;
+    --manifest) MANIFEST_PATH="${2:-}"; shift 2 ;;
+    --app-version) APP_VERSION="${2:-}"; shift 2 ;;
+    --app-url) APP_URL="${2:-}"; shift 2 ;;
+    -h|--help) usage; exit 0 ;;
+    *) echo "Unknown argument: $1"; usage; exit 1 ;;
   esac
 done
 
@@ -73,7 +52,7 @@ fi
 MANIFEST_DIR="$(cd "$(dirname "$MANIFEST_PATH")" && pwd)"
 MANIFEST_FILE="$(basename "$MANIFEST_PATH")"
 FINAL_MANIFEST="$MANIFEST_DIR/$MANIFEST_FILE"
-STATE_DIR="$SCRIPT_DIR/.state"
+STATE_DIR="$BUILD_ROOT/.state"
 PREV_MANIFEST="$STATE_DIR/manifest.prev.json"
 NEW_MANIFEST="$STATE_DIR/manifest.new.json"
 

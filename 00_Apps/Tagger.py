@@ -499,7 +499,15 @@ class TaggerWindow(QWidget):
         y = (size - img.size[1]) // 2
         canvas.paste(img, (x, y))
 
-        canvas.save(thumb_path, "JPEG", quality=85, optimize=True, progressive=True)
+        # Use high-quality JPEG with 4:4:4 chroma to avoid soft-looking thumbnails.
+        canvas.save(
+            thumb_path,
+            "JPEG",
+            quality=95,
+            optimize=True,
+            progressive=False,
+            subsampling=0,
+        )
 
 
 

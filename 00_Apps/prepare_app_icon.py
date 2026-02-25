@@ -10,8 +10,8 @@ from pathlib import Path
 from PIL import Image
 
 
-SOURCE_ICON = Path("00_Apps/app_icon.png")
-OUTPUT_ICON = Path("00_Apps/app_icon_packaged.png")
+SOURCE_ICON = Path("00_Apps/assets/icons/app_icon.png")
+OUTPUT_ICON = Path("00_Apps/assets/icons/app_icon_packaged.png")
 CANVAS_SIZE = 1024
 CONTENT_SCALE = 0.82
 

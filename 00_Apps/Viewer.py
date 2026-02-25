@@ -78,23 +78,31 @@ class ClickableThumb(QLabel):
             return
 
         side = max(1, min(self.width(), self.height()))
+        dpr = max(1.0, float(self.devicePixelRatioF()))
+        px_side = max(1, int(round(side * dpr)))
 
-        # Scale to FIT (no cropping)
+        # Scale in physical pixels to keep thumbnails crisp on HiDPI displays.
         scaled = self._orig_pix.scaled(
-            side, side,
+            px_side,
+            px_side,
             Qt.AspectRatioMode.KeepAspectRatio,
-            Qt.TransformationMode.SmoothTransformation
+            Qt.TransformationMode.SmoothTransformation,
         )
+        scaled.setDevicePixelRatio(dpr)
 
-        # Letterbox into a square canvas so QLabel never clips anything
-        canvas = QPixmap(side, side)
+        # Letterbox into a square canvas so QLabel never clips anything.
+        canvas = QPixmap(px_side, px_side)
+        canvas.setDevicePixelRatio(dpr)
         canvas.fill(Qt.GlobalColor.transparent)
 
-        p = QPainter(canvas)
-        x = (side - scaled.width()) // 2
-        y = (side - scaled.height()) // 2
-        p.drawPixmap(x, y, scaled)
-        p.end()
+        painter = QPainter(canvas)
+        painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform, True)
+
+        scaled_logical = scaled.deviceIndependentSize()
+        x = int((side - scaled_logical.width()) / 2)
+        y = int((side - scaled_logical.height()) / 2)
+        painter.drawPixmap(x, y, scaled)
+        painter.end()
 
         self.setPixmap(canvas)
 
@@ -103,7 +111,14 @@ class ClickableThumb(QLabel):
         self._rebuild_thumb()
 
     def mousePressEvent(self, event):
-        self.parent().parent().preview_clicked(self.index)
+        # Walk up parents to find the viewer container; avoids fragile parent().parent() assumptions.
+        parent = self.parentWidget()
+        while parent is not None:
+            cb = getattr(parent, "preview_clicked", None)
+            if callable(cb):
+                cb(self.index)
+                break
+            parent = parent.parentWidget()
         super().mousePressEvent(event)
 
 
@@ -333,7 +348,7 @@ class MiniViewer(QWidget):
     def __init__(self, archive_root: Path, splash: QSplashScreen | None = None):
         super().__init__()
         self.setWindowTitle("Ragnar's Miniature Archive")
-        self.setMinimumSize(780, 520)
+        self.setMinimumSize(1020, 700)
         self.archive_root = archive_root
         self.splash = splash
         self.update_cfg = self.load_update_config()
@@ -546,15 +561,17 @@ class MiniViewer(QWidget):
         reset_layout.addItem(QSpacerItem(10, 10, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
         reset_layout.addWidget(self.reset_btn)
 
-        left_layout = QVBoxLayout()
+        self.left_panel = QWidget()
+        left_layout = QVBoxLayout(self.left_panel)
+        left_layout.setContentsMargins(0, 0, 0, 0)
         left_layout.addLayout(search_layout)
         left_layout.addLayout(tag_grid)
         left_layout.addLayout(reset_layout)
         self.results_header = QLabel("Results")
         left_layout.addWidget(self.results_header)
         left_layout.addWidget(self.results_list, 1)
+        self.left_panel.setMinimumWidth(340)
 
-        
 
         # -------------------- RIGHT SIDE --------------------
 
@@ -563,7 +580,7 @@ class MiniViewer(QWidget):
         self.player = QMediaPlayer()
         self.video_widget = QVideoWidget()
         self.video_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.video_widget.setMinimumWidth(320)  # allow shrink on smaller displays
+        self.video_widget.setMinimumSize(340, 200)
 
         self.player.setVideoOutput(self.video_widget)
         self.player.setPlaybackRate(0.5)
@@ -574,6 +591,7 @@ class MiniViewer(QWidget):
 
         self.top_container = QWidget()
         self.top_container.setStyleSheet("background: palette(base);")
+        self.top_container.setMinimumHeight(200)
         top_layout = QHBoxLayout(self.top_container)
         top_layout.setContentsMargins(0, 0, 0, 0)
         top_layout.setSpacing(0)
@@ -595,19 +613,18 @@ class MiniViewer(QWidget):
         self.preview_widgets = []
         self.max_previews = 60
         self.current_results = []
-        self.thumb_side = 170
-        self.preview_rows = 2
+        self.thumb_side = 158
+        self.preview_rows_min = 1
+        self.preview_rows_max = 2
 
-        # Keep preview strip bounded so top video area remains dominant.
+        # Keep preview strip bounded so top video area remains dominant,
+        # while allowing one row to collapse on smaller windows.
         m = self.preview_layout.contentsMargins()
-        preview_h = (
-            (self.thumb_side * self.preview_rows)
-            + (self.preview_layout.spacing() * (self.preview_rows - 1))
-            + m.top()
-            + m.bottom()
-        )
-        self.preview_container.setMaximumHeight(preview_h)
-        self.preview_container.setMinimumHeight(preview_h)
+        spacing = self.preview_layout.spacing()
+        one_row_h = self.thumb_side + m.top() + m.bottom()
+        two_rows_h = (self.thumb_side * 2) + spacing + m.top() + m.bottom()
+        self.preview_container.setMinimumHeight(one_row_h)
+        self.preview_container.setMaximumHeight(two_rows_h)
 
         for i in range(self.max_previews):
             w = ClickableThumb(self.preview_container)
@@ -617,21 +634,24 @@ class MiniViewer(QWidget):
             w.hide()
             self.preview_widgets.append(w)
 
-        right_layout = QVBoxLayout()
+        self.right_panel = QWidget()
+        right_layout = QVBoxLayout(self.right_panel)
+        right_layout.setContentsMargins(0, 0, 0, 0)
         right_layout.addWidget(self.top_container, 5)
         right_layout.addWidget(self.image_label, 0)      # keep for non-video files if you want
-        right_layout.addWidget(self.preview_container, 1)
+        right_layout.addWidget(self.preview_container, 5)
 
         update_footer = QHBoxLayout()
         update_footer.addWidget(self.update_status_label, 1)
         update_footer.addWidget(self.download_updates_btn, 0)
         update_footer.addWidget(self.app_update_btn, 0)
         right_layout.addLayout(update_footer, 0)
+        self.right_panel.setMinimumWidth(540)
 
         # main layout
         main_layout = QHBoxLayout(self)
-        main_layout.addLayout(left_layout, 1)
-        main_layout.addLayout(right_layout, 2)
+        main_layout.addWidget(self.left_panel, 2)
+        main_layout.addWidget(self.right_panel, 3)
 
         # startup sync (for splash-driven first launch / auto-update)
         self.startup_auto_update_with_splash()
@@ -1018,9 +1038,14 @@ class MiniViewer(QWidget):
         side = self.thumb_side
         cols = max(1, (W + spacing) // (side + spacing))
 
-        # Rows from height and how many we can show
-        rows = max(1, min(self.preview_rows, (H + spacing) // (side + spacing)))
+        # Rows from height and how many we can show.
+        rows_fit = max(1, (H + spacing) // (side + spacing))
+        rows = max(self.preview_rows_min, min(self.preview_rows_max, rows_fit))
         max_visible = max(1, cols * rows)
+
+        # Keep at least two thumbnails visible (if we have at least two results).
+        if n_total >= 2:
+            max_visible = max(2, max_visible)
 
         n_show = min(n_total, max_visible)
 
@@ -1252,14 +1277,19 @@ class MiniViewer(QWidget):
 
     def load_update_config(self):
         candidates = []
-        candidates.append(Path(__file__).resolve().parent / "archive_update_config.json")
+        script_dir = Path(__file__).resolve().parent
+        candidates.append(script_dir / "config" / "archive_update_config.json")
+        candidates.append(script_dir / "archive_update_config.json")
         meipass = getattr(sys, "_MEIPASS", "")
         if meipass:
+            candidates.append(Path(meipass) / "config" / "archive_update_config.json")
             candidates.append(Path(meipass) / "archive_update_config.json")
         if getattr(sys, "frozen", False):
             exe_dir = Path(sys.executable).resolve().parent
+            candidates.append(exe_dir / "config" / "archive_update_config.json")
             candidates.append(exe_dir / "archive_update_config.json")
             # macOS .app => .../Contents/MacOS ; config may live in Contents/Resources
+            candidates.append(exe_dir.parent / "Resources" / "config" / "archive_update_config.json")
             candidates.append(exe_dir.parent / "Resources" / "archive_update_config.json")
 
         for cfg_path in candidates:
@@ -1729,6 +1759,7 @@ def main():
         path_candidates = []
         script_dir = Path(__file__).resolve().parent
         for n in name_candidates:
+            path_candidates.append(script_dir / "assets" / "splash" / n)
             path_candidates.append(script_dir / n)
             path_candidates.append(script_dir.parent / n)
 
@@ -1736,6 +1767,7 @@ def main():
             exe_dir = Path(sys.executable).resolve().parent
             # inside .app resources
             for n in name_candidates:
+                path_candidates.append(exe_dir.parent / "Resources" / "assets" / "splash" / n)
                 path_candidates.append(exe_dir.parent / "Resources" / n)
             # alongside .app in dist/
             try:

@@ -15,7 +15,7 @@ FULL_IMG_EXTS = {".jpg", ".jpeg"}  # acceptable full-res sources
 THUMB_EXTS = {".jpg", ".jpeg"}          # thumbs will be written as jpg by default
 
 DEFAULT_THUMB_SIZE = 512
-DEFAULT_THUMB_QUALITY = 85
+DEFAULT_THUMB_QUALITY = 95
 
 
 # ---------- Helpers ----------
@@ -168,7 +168,14 @@ def make_thumb(full_img_path: Path, thumb_path: Path, size: int, quality: int) -
         y = (size - img.size[1]) // 2
         canvas.paste(img, (x, y))
 
-        canvas.save(thumb_path, format="JPEG", quality=quality, optimize=True, progressive=True)
+        canvas.save(
+            thumb_path,
+            format="JPEG",
+            quality=quality,
+            optimize=True,
+            progressive=False,
+            subsampling=0,
+        )
         return True, f"Generated thumbnail: {thumb_path}"
     except Exception as e:
         return False, f"Thumbnail generation failed for {full_img_path}: {e}"

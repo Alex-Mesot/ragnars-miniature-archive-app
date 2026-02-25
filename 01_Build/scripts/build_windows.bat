@@ -2,18 +2,21 @@
 setlocal
 
 set "SCRIPT_DIR=%~dp0"
-for %%I in ("%SCRIPT_DIR%..") do set "ROOT_DIR=%%~fI"
-set "PYINSTALLER_CONFIG_DIR=%SCRIPT_DIR%.pyinstaller"
-set "BUILD_DIR=%SCRIPT_DIR%build"
-set "DIST_DIR=%SCRIPT_DIR%dist"
-set "SPEC_DIR=%SCRIPT_DIR%spec"
+for %%I in ("%SCRIPT_DIR%..") do set "BUILD_ROOT=%%~fI"
+for %%I in ("%BUILD_ROOT%\..") do set "ROOT_DIR=%%~fI"
+
+set "PYINSTALLER_CONFIG_DIR=%BUILD_ROOT%\.pyinstaller"
+set "BUILD_DIR=%BUILD_ROOT%\build"
+set "DIST_DIR=%BUILD_ROOT%\dist"
+set "SPEC_DIR=%BUILD_ROOT%\spec"
+
 cd /d "%ROOT_DIR%"
 if not exist "%BUILD_DIR%" mkdir "%BUILD_DIR%"
 if not exist "%DIST_DIR%" mkdir "%DIST_DIR%"
 if not exist "%SPEC_DIR%" mkdir "%SPEC_DIR%"
 
 if "%PYTHON_BIN%"=="" set "PYTHON_BIN=python"
-if "%VENV_DIR%"=="" set "VENV_DIR=%SCRIPT_DIR%.venv-build"
+if "%VENV_DIR%"=="" set "VENV_DIR=%BUILD_ROOT%\.venv-build"
 
 if not exist "%VENV_DIR%\Scripts\python.exe" (
   "%PYTHON_BIN%" -m venv "%VENV_DIR%"
@@ -31,11 +34,10 @@ pyinstaller --noconfirm --clean ^
   --onefile ^
   --name "Ragnars Miniature Archive" ^
   --windowed ^
-  --icon "..\..\00_Apps\app_icon_packaged.png" ^
-  --add-data "..\..\00_Apps\archive_update_config.json;." ^
+  --icon "..\..\00_Apps\assets\icons\app_icon_packaged.png" ^
+  --add-data "..\..\00_Apps\config\archive_update_config.json;config" ^
   --add-data "..\..\00_Apps\categories.json;." ^
-  --add-data "..\..\00_Apps\splash_screen.png;." ^
-  --add-data "..\..\00_Apps\app_icon_packaged.png;." ^
+  --add-data "..\..\00_Apps\assets\splash\splash_screen.png;assets\splash" ^
   "..\..\00_Apps\Viewer.py"
 popd
 

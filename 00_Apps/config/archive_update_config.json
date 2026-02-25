@@ -1,0 +1,10 @@
+{
+  "manifest_url": "https://pub-663041a0e08d49928417c811d6a8ab18.r2.dev/manifest.json",
+  "app_release_url": "https://pub-663041a0e08d49928417c811d6a8ab18.r2.dev/releases",
+  "check_on_startup": true,
+  "bootstrap_full_archive": true,
+  "download_fullres_images": false,
+  "request_timeout_seconds": 6,
+  "download_timeout_seconds": 20,
+  "remove_deleted": false
+}

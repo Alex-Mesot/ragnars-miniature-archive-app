@@ -19,7 +19,7 @@ jobs:
           python-version: "3.12"
 
       - name: Build macOS app
-        run: ./01_Build/build_mac.sh
+        run: ./01_Build/scripts/build_mac.sh
 
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
@@ -41,7 +41,7 @@ jobs:
 
       - name: Build Windows exe
         shell: cmd
-        run: 01_Build\build_windows.bat
+        run: 01_Build\scripts\build_windows.bat
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
@@ -67,7 +67,7 @@ jobs:
           sudo apt-get install -y libgl1 libegl1 libxkbcommon-x11-0 libxcb-cursor0
 
       - name: Build Linux binary
-        run: ./01_Build/build_linux.sh
+        run: ./01_Build/scripts/build_linux.sh
 
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4

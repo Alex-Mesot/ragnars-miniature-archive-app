@@ -2,16 +2,17 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+BUILD_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+ROOT_DIR="$(cd "$BUILD_ROOT/.." && pwd)"
 
 usage() {
-  cat <<'EOF'
+  cat <<'USAGE'
 Usage:
-  ./01_Build/sync_to_r2.sh [--source PATH] [--target REMOTE:BUCKET] [--dry-run]
+  ./01_Build/scripts/sync_to_r2.sh [--source PATH] [--target REMOTE:BUCKET] [--dry-run]
 
 Examples:
-  ./01_Build/sync_to_r2.sh
-  ./01_Build/sync_to_r2.sh --target "r2:ragnar-archive" --dry-run
+  ./01_Build/scripts/sync_to_r2.sh
+  ./01_Build/scripts/sync_to_r2.sh --target "r2:ragnar-archive" --dry-run
 
 Requirements:
   - rclone installed
@@ -20,7 +21,7 @@ Requirements:
 Notes:
   - Safe default: uses `rclone copy` (does NOT delete remote files).
   - Uploads archive/media + manifest files, excludes local app/dev folders.
-EOF
+USAGE
 }
 
 SOURCE="$ROOT_DIR"
@@ -29,27 +30,11 @@ DRY_RUN=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --source)
-      SOURCE="${2:-}"
-      shift 2
-      ;;
-    --target)
-      TARGET="${2:-}"
-      shift 2
-      ;;
-    --dry-run)
-      DRY_RUN=1
-      shift
-      ;;
-    -h|--help)
-      usage
-      exit 0
-      ;;
-    *)
-      echo "Unknown argument: $1"
-      usage
-      exit 1
-      ;;
+    --source) SOURCE="${2:-}"; shift 2 ;;
+    --target) TARGET="${2:-}"; shift 2 ;;
+    --dry-run) DRY_RUN=1; shift ;;
+    -h|--help) usage; exit 0 ;;
+    *) echo "Unknown argument: $1"; usage; exit 1 ;;
   esac
 done
 

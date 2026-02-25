@@ -22,10 +22,9 @@ manifest.prev.json
 .archive_sync_state.json
 
 # Local app/archive runtime files
-archive_update_config.json
 archive_service_report.txt
-app_icon.iconset/
-00_Apps/app_icon_packaged.png
+00_Apps/assets/icons/app_icon.iconset/
+00_Apps/assets/icons/app_icon_packaged.png
 
 # Optional local DB/media if you want a lightweight code-only Git repo.
 # Uncomment these if you do NOT want to version the archive content in Git.
