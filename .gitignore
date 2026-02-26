@@ -26,21 +26,25 @@ archive_service_report.txt
 00_Apps/assets/icons/app_icon.iconset/
 00_Apps/assets/icons/app_icon_packaged.png
 
-# Optional local DB/media if you want a lightweight code-only Git repo.
-# Uncomment these if you do NOT want to version the archive content in Git.
-# miniatures.db
-# Aberration/
-# Beast/
-# Celestial/
-# Construct/
-# Dragon/
-# Elemental/
-# Fey/
-# Fiend/
-# Giant/
-# Humanoid/
-# Monstrosity/
-# Object/
-# Ooze/
-# Plant/
-# Undead/
+# Archive content (keep local/R2, do not version in public code repo)
+manifest.json
+miniatures.db
+00_Apps/miniatures.db
+Aberration/
+Beast/
+Celestial/
+Construct/
+Dragon/
+Elemental/
+Fey/
+Fiend/
+Giant/
+Humanoid/
+Monstrosity/
+Object/
+Ooze/
+Plant/
+Undead/
+
+# Source asset with embedded provenance metadata (keep local only)
+00_Apps/assets/icons/app_icon.svg
