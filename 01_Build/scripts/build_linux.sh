@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Build Linux app binary from repository root.
+# Run:
+#   ./01_Build/scripts/build_linux.sh
+# Output:
+#   01_Build/dist/Ragnars Miniature Archive
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 ROOT_DIR="$(cd "$BUILD_ROOT/.." && pwd)"

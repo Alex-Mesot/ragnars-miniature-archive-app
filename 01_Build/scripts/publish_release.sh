@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Build and publish-ready manifest workflow.
+# Run:
+#   ./01_Build/scripts/publish_release.sh [options]
+# Help:
+#   ./01_Build/scripts/publish_release.sh --help
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 ROOT_DIR="$(cd "$BUILD_ROOT/.." && pwd)"

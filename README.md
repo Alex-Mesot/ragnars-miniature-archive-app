@@ -70,6 +70,28 @@ The viewer reads available columns dynamically, so legacy/current schemas are bo
 - transfers tags from `.jpg` to `.mp4`
 - run with `python3 00_Apps/gif_mp4_converter.py`
 
+`01_Build/scripts/build_mac.sh`
+- builds macOS app bundle
+- run with `./01_Build/scripts/build_mac.sh`
+
+`01_Build/scripts/build_linux.sh`
+- builds Linux app binary
+- run with `./01_Build/scripts/build_linux.sh`
+
+`01_Build/scripts/build_windows.bat`
+- builds Windows app binary
+- run with `01_Build\\scripts\\build_windows.bat`
+
+`01_Build/scripts/publish_release.sh`
+- generates/updates `manifest.json` from local archive files
+- merges deleted-file list from previous manifest state
+- run with `./01_Build/scripts/publish_release.sh`
+
+`01_Build/scripts/sync_to_r2.sh`
+- uploads archive content to Cloudflare R2 using `rclone copy`
+- excludes app/build/development folders during sync
+- run with `./01_Build/scripts/sync_to_r2.sh`
+
 ## Release
 
 App release page:

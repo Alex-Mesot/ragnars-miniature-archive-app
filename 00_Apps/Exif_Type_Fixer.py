@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""
+Normalize body-type tags written to media metadata.
+
+Run:
+  python3 00_Apps/Exif_Type_Fixer.py
+"""
 import subprocess
 from pathlib import Path
 import json

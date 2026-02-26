@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""
+Merge deleted file paths from previous manifest into a new manifest.
+
+Run:
+  python3 00_Apps/manifest_merge_deleted.py --old manifest.prev.json --new manifest.new.json --out manifest.json
+"""
 import argparse
 import json
 from pathlib import Path

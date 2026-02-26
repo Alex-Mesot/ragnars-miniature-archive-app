@@ -1,6 +1,12 @@
 @echo off
 setlocal
 
+REM Build Windows app binary from repository root.
+REM Run:
+REM   01_Build\scripts\build_windows.bat
+REM Output:
+REM   01_Build\dist\Ragnars Miniature Archive.exe
+
 set "SCRIPT_DIR=%~dp0"
 for %%I in ("%SCRIPT_DIR%..") do set "BUILD_ROOT=%%~fI"
 for %%I in ("%BUILD_ROOT%\..") do set "ROOT_DIR=%%~fI"

@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""
+Archive maintenance utility for metadata, naming, and thumbnail workflows.
+
+Run:
+  python3 00_Apps/archive_service.py --help
+"""
 import argparse
 import json
 import subprocess

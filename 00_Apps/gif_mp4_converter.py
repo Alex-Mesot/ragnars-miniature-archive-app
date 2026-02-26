@@ -1,7 +1,16 @@
+#!/usr/bin/env python3
+"""
+Recreate MP4 files from matching GIF files and copy tags from JPG.
+
+Run:
+  python3 00_Apps/gif_mp4_converter.py
+
+Run from archive root.
+"""
 import subprocess
 from pathlib import Path
 
-root = Path(".")  # change this to your top folder
+root = Path(".")
 
 for jpg in root.rglob("*"):
     if not jpg.is_file():

@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+"""
+Rebuild and resync miniatures database from media metadata.
+
+Run:
+  python3 00_Apps/Database_Updater.py
+  python3 00_Apps/Database_Updater.py /path/to/archive_root
+"""
 import sys
 import json
 import sqlite3

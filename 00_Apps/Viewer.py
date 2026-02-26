@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""
+Desktop viewer for archive media and tag search.
+
+Run:
+  python3 00_Apps/Viewer.py
+"""
 import sys
 import os
 import random
@@ -709,10 +715,6 @@ class MiniViewer(QWidget):
     def tokenize_user_input(self, s: str) -> list[str]:
         """
         Split user input into tokens while respecting quotes.
-        Examples:
-        Red Arrow        -> ["Red", "Arrow"]
-        "Deepwood Elves" -> ["Deepwood Elves"]
-        -bow             -> ["-bow"]
         """
         s = s.strip()
         if not s:

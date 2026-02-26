@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Sync archive content to Cloudflare R2 using rclone.
+# Run:
+#   ./01_Build/scripts/sync_to_r2.sh [options]
+# Help:
+#   ./01_Build/scripts/sync_to_r2.sh --help
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 ROOT_DIR="$(cd "$BUILD_ROOT/.." && pwd)"
@@ -10,16 +16,12 @@ usage() {
 Usage:
   ./01_Build/scripts/sync_to_r2.sh [--source PATH] [--target REMOTE:BUCKET] [--dry-run]
 
-Examples:
-  ./01_Build/scripts/sync_to_r2.sh
-  ./01_Build/scripts/sync_to_r2.sh --target "r2:ragnar-archive" --dry-run
-
 Requirements:
   - rclone installed
   - rclone remote already configured for Cloudflare R2
 
 Notes:
-  - Safe default: uses `rclone copy` (does NOT delete remote files).
+  - Uses `rclone copy` (does not delete remote files).
   - Uploads archive/media + manifest files, excludes local app/dev folders.
 USAGE
 }

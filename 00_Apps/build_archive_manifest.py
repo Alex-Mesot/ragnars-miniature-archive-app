@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""
+Build manifest.json for archive sync distribution.
+
+Run:
+  python3 00_Apps/build_archive_manifest.py . --base-url "<public-base-url>" --output manifest.json
+"""
 import argparse
 import hashlib
 import json

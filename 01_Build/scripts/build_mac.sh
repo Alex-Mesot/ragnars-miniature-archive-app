@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Build macOS app bundle from repository root.
+# Run:
+#   ./01_Build/scripts/build_mac.sh
+# Output:
+#   01_Build/dist/Ragnars Miniature Archive.app
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 ROOT_DIR="$(cd "$BUILD_ROOT/.." && pwd)"
