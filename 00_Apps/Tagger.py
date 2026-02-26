@@ -18,20 +18,36 @@ from PyQt6.QtMultimediaWidgets import QVideoWidget
 from PyQt6.QtCore import QUrl, Qt
 from PIL import Image, ImageOps
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+DEFAULT_ARCHIVE_ROOT = SCRIPT_DIR.parent
+DEFAULT_SOURCE_DIRNAME = "02_to_tag"
+DEFAULT_STAGING_SUBFOLDER = "00_to_archive"
 
 """
-mini_importer.py
+Tagger.py
 
 Usage:
-    python3 mini_importer.py /path/to/source_mp4s /path/to/Miniature_Archive
+    python3 00_Apps/Tagger.py
+    python3 00_Apps/Tagger.py /path/to/source_mp4s "/path/to/Ragnars Miniature Archive"
 
 What it does:
-- iterates over all .mp4 files in source_mp4s
-- shows video
-- lets user rename and tag
-- moves file into archive in the right subfolder
-- writes metadata with exiftool
-- updates miniatures.db in the archive
+- Iterates over all `.mp4` files in `source_mp4s`
+- Shows each video for review
+- Lets you rename and tag each miniature
+- Moves files into the archive folder structure
+- Writes MP4 metadata with `exiftool`
+- Updates `<archive_root>/miniatures.db`
+
+Paths used by this script:
+- Default archive root: parent folder of `00_Apps` (this repository root)
+- Default source folder: `<archive_root>/02_to_tag` (auto-created if missing)
+- Categories config: `00_Apps/categories.json` (same folder as this script)
+- SQLite DB: `<archive_root>/miniatures.db`
+- Destination media folders:
+  - `<archive_root>/<CreatureType>/...`
+  - `<archive_root>/Humanoid/<HumanoidType>/...` (when creature type is Humanoid)
+- New-item staging folder (for R3 copy tracking):
+  - `<destination_folder>/00_to_archive/`
 """
 
 # ---------------------------------------------------------------------
@@ -65,16 +81,12 @@ What it does:
 #     "sizes": ["Tiny", "Small", "Medium", "Large", "Huge", "Gargantuan"]
 # }
 
-
-import json
-from pathlib import Path
-
 def load_categories() -> dict:
     """
     Load categories.json from the same folder as this script (00_Apps).
     Raise if missing or invalid.
     """
-    script_dir = Path(__file__).resolve().parent
+    script_dir = SCRIPT_DIR
     cfg_file = script_dir / "categories.json"
 
     if not cfg_file.exists():
@@ -166,10 +178,11 @@ def upsert_miniature(conn, name, rel_path, tags,
 class TaggerWindow(QWidget):
     def __init__(self, source_dir: Path, archive_root: Path):
         super().__init__()
-        self.setWindowTitle("Miniature MP4 Importer")
+        self.setWindowTitle("Miniature Tagger")
         self.source_dir = source_dir
         self.archive_root = archive_root
         self.categories = load_categories()
+        self.ensure_archive_staging_folders()
 
         self.files = sorted([p for p in self.source_dir.iterdir() if p.suffix.lower() == ".mp4"])
         self.current_index = 0
@@ -264,7 +277,7 @@ class TaggerWindow(QWidget):
         grid.addWidget(self.group_box("Colors (top 3)", self.color_list), 1, 0)
         grid.addWidget(self.group_box("Equipment", self.equipment_list), 1, 1)
         grid.addWidget(self.group_box("Role", self.role_list), 2, 0)
-        grid.addWidget(self.group_box("Body Type (if applicaple)", self.body_type_list), 2, 1)
+        grid.addWidget(self.group_box("Body Type (if applicable)", self.body_type_list), 2, 1)
         grid.addWidget(self.group_box("Size", self.size_list), 3, 0)
 
         right_layout.addLayout(grid)
@@ -298,7 +311,7 @@ class TaggerWindow(QWidget):
         self.clear_selections()
         self.player.setSource(QUrl.fromLocalFile(str(current_file)))
         self.player.play()
-        self.setWindowTitle(f"Miniature MP4 Importer - {current_file.name}")
+        self.setWindowTitle(f"Miniature Tagger - {current_file.name}")
 
         # Auto-detect full-res image for this mp4
         self.fullres_path = self.auto_find_fullres(current_file)
@@ -379,6 +392,7 @@ class TaggerWindow(QWidget):
 
         # Move/rename full-res image too (if available)
         dest_full_img = None
+        thumb_path = None
         if self.fullres_path and self.fullres_path.exists():
             ext = self.fullres_path.suffix.lower()
             # store full-res as .jpg if you want consistency, or keep ext:
@@ -414,6 +428,9 @@ class TaggerWindow(QWidget):
             body_type=body_type,
             sizes=size
         )
+
+        # copy newly-tagged assets into a per-folder staging area for archive sync
+        self.copy_assets_to_staging(dest_dir, [dest_file, dest_full_img, thumb_path])
 
         # go next
         self.current_index += 1
@@ -509,22 +526,71 @@ class TaggerWindow(QWidget):
             subsampling=0,
         )
 
+    def copy_assets_to_staging(self, destination_folder: Path, paths: list[Optional[Path]]):
+        staging_dir = destination_folder / DEFAULT_STAGING_SUBFOLDER
+        staging_dir.mkdir(parents=True, exist_ok=True)
+        for p in paths:
+            if p and p.exists():
+                target = self.next_available_staging_name(staging_dir, p.name)
+                shutil.copy2(p, target)
+
+    def next_available_staging_name(self, staging_dir: Path, filename: str) -> Path:
+        target = staging_dir / filename
+        if not target.exists():
+            return target
+
+        stem = Path(filename).stem
+        suffix = Path(filename).suffix
+        i = 1
+        while True:
+            candidate = staging_dir / f"{stem}__new{i}{suffix}"
+            if not candidate.exists():
+                return candidate
+            i += 1
+
+    def ensure_archive_staging_folders(self):
+        # Create staging folders up front in every creature folder and humanoid subtype folder.
+        for creature in self.categories.get("creature_type", []):
+            creature_dir = self.archive_root / creature
+            creature_dir.mkdir(parents=True, exist_ok=True)
+            (creature_dir / DEFAULT_STAGING_SUBFOLDER).mkdir(parents=True, exist_ok=True)
+
+            if creature == "Humanoid":
+                for subtype in self.categories.get("humanoid_type", []):
+                    subtype_dir = creature_dir / subtype
+                    subtype_dir.mkdir(parents=True, exist_ok=True)
+                    (subtype_dir / DEFAULT_STAGING_SUBFOLDER).mkdir(parents=True, exist_ok=True)
+
+                # Also cover any already-existing custom humanoid subtype folders.
+                for sub in creature_dir.iterdir():
+                    if sub.is_dir() and sub.name != DEFAULT_STAGING_SUBFOLDER:
+                        (sub / DEFAULT_STAGING_SUBFOLDER).mkdir(parents=True, exist_ok=True)
 
 
 
 def main():
-    if len(sys.argv) < 3:
-        print("Usage: python3 mini_importer.py /path/to/source_mp4s /path/to/Miniature_Archive")
+    source_dir = (
+        Path(sys.argv[1]).expanduser().resolve()
+        if len(sys.argv) >= 2
+        else (DEFAULT_ARCHIVE_ROOT / DEFAULT_SOURCE_DIRNAME)
+    )
+    archive_root = (
+        Path(sys.argv[2]).expanduser().resolve()
+        if len(sys.argv) >= 3
+        else DEFAULT_ARCHIVE_ROOT
+    )
+
+    if not archive_root.exists():
+        print(f"Archive folder does not exist: {archive_root}")
         sys.exit(1)
 
-    source_dir = Path(sys.argv[1]).expanduser().resolve()
-    archive_root = Path(sys.argv[2]).expanduser().resolve()
+    # Auto-create default intake folder so new files can just be dropped in.
+    if source_dir == (DEFAULT_ARCHIVE_ROOT / DEFAULT_SOURCE_DIRNAME) and not source_dir.exists():
+        source_dir.mkdir(parents=True, exist_ok=True)
+        print(f"Created source folder: {source_dir}")
 
     if not source_dir.exists():
-        print("Source folder does not exist.")
-        sys.exit(1)
-    if not archive_root.exists():
-        print("Archive folder does not exist.")
+        print(f"Source folder does not exist: {source_dir}")
         sys.exit(1)
 
     app = QApplication(sys.argv)

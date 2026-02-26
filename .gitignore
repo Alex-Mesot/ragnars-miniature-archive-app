@@ -30,6 +30,7 @@ archive_service_report.txt
 manifest.json
 miniatures.db
 00_Apps/miniatures.db
+02_to_tag/
 Aberration/
 Beast/
 Celestial/
