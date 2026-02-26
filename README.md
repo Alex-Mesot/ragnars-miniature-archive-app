@@ -1,4 +1,5 @@
 # Ragnar's Miniature Archive
+<img width="1536" height="1024" alt="splash_screen" src="https://github.com/user-attachments/assets/1e14ea3d-08c1-4b41-a4f1-fae394bfaf12" />
 
 Local archive of painted D&D miniatures with:
 - category-based media folders at repository root
